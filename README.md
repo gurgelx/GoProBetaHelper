@@ -6,7 +6,7 @@ Download and unzip all the files
 Then just run **GoPro Webcam Beta helper.exe**
 
  Rel 0.1, simple POC
- [GitHub](https://github.com/gurgelx/GoProBetaHelper/blob/master/releases/release.0.1.zip?raw=true)
+ [Download](https://github.com/gurgelx/GoProBetaHelper/blob/master/releases/release.0.1.zip?raw=true)
  
 
 ## Feel free to contribute
