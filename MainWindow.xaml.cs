@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GoPro_Webcam_Beta_helper.GoProConnector;
+using System;
 using System.Windows;
 using System.Windows.Media;
 
@@ -9,23 +10,23 @@ namespace GoPro_Webcam_Beta_helper
     /// </summary>
     public partial class MainWindow : Window
     {
-        public GoProConnector Connector { get; set; }
+        public GoProClient GoProClient { get; set; }
         public MainWindow()
         {
             InitializeComponent();
-            this.Connector = new GoProConnector();
-            this.Connector.OnConnect += Connector_OnConnect;
-            this.Connector.OnDisconnect += Connector_OnDisconnect;
-            this.Connector.OnData += Connector_OnData;
-            this.Connector.Connect();            
+            this.GoProClient = new GoProClient();
+            this.GoProClient.OnConnect += Connector_OnConnect;
+            this.GoProClient.OnDisconnect += Connector_OnDisconnect;
+            this.GoProClient.OnData += Connector_OnData;
+            this.GoProClient.Connect();            
         }
 
         private void Connector_OnConnect(object sender, EventArgs e)
         {
             this.Dispatcher.Invoke(() =>
             {
-                this.IpLabel.Content = this.Connector.GoProIPAddress;
-                this.NameLabel.Content = this.Connector.Name;
+                this.IpLabel.Content = this.GoProClient.GoProIPAddress;
+                this.NameLabel.Content = this.GoProClient.Name;
                 this.OffButton.IsEnabled = true;
                 this.WideButton.IsEnabled = true;
                 this.WideButton.IsEnabled = true;
@@ -42,8 +43,8 @@ namespace GoPro_Webcam_Beta_helper
         {
             this.Dispatcher.Invoke(() =>
             {
-                this.IpLabel.Content = this.Connector.GoProIPAddress;
-                this.NameLabel.Content = this.Connector.Name;
+                this.IpLabel.Content = this.GoProClient.GoProIPAddress;
+                this.NameLabel.Content = this.GoProClient.Name;
                 this.OffButton.IsEnabled = false;
                 this.WideButton.IsEnabled = false;
                 this.WideButton.IsEnabled = false;
@@ -62,20 +63,20 @@ namespace GoPro_Webcam_Beta_helper
             this.Dispatcher.Invoke(() =>
             {
 
-                if (this.Connector.Connected == false)
+                if (this.GoProClient.Connected == false)
                 {
                     this.NameLabel.Content = "Camera is: Disconnected";
                 }
                 else
                 {
 
-                    this.IpLabel.Content = this.Connector.GoProIPAddress;
-                    this.NameLabel.Content = "Camera is: " + this.Connector.Name;
-                    this.ResolutionLabel.Content = "Resolution is: " + this.Connector.Resolution;
-                    this.BatteryLabel.Content = "Battery Percent is: " + this.Connector.BatteryPercent;
+                    this.IpLabel.Content = this.GoProClient.GoProIPAddress;
+                    this.NameLabel.Content = "Camera is: " + this.GoProClient.Name;
+                    this.ResolutionLabel.Content = "Resolution is: " + this.GoProClient.Resolution;
+                    this.BatteryLabel.Content = "Battery Percent is: " + this.GoProClient.BatteryPercent;
 
                     var lensIs = "Current lens is: ";
-                    switch (this.Connector.Lens)
+                    switch (this.GoProClient.Lens)
                     {
                         case 0:
                             lensIs += "Wide";
@@ -100,7 +101,7 @@ namespace GoPro_Webcam_Beta_helper
                             break;
                     }
 
-                    switch (this.Connector.Resolution)
+                    switch (this.GoProClient.Resolution)
                     {
                         case "720":
                             this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
@@ -115,7 +116,7 @@ namespace GoPro_Webcam_Beta_helper
                             this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
                             break;
                     }
-                    if (this.Connector.Started)
+                    if (this.GoProClient.Started)
                     {
                         this.StartButton.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
                         this.StopButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
@@ -131,46 +132,46 @@ namespace GoPro_Webcam_Beta_helper
         }
         private void UpdateStatus(object sender, RoutedEventArgs e)
         {
-            this.Connector.UpdateStatus();
+            this.GoProClient.UpdateStatus();
         }
 
         private void WideButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.SetWideMode();
+            this.GoProClient.SetWideMode();
         }
 
         private void NarrowButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.SetNarrowMode();
+            this.GoProClient.SetNarrowMode();
         }
 
         private void LinearButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.SetLinearMode();
+            this.GoProClient.SetLinearMode();
         }
         private void Res720ButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.SetRes720();
+            this.GoProClient.SetRes720();
         }
         private void Res1080ButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.SetRes1080();
+            this.GoProClient.SetRes1080();
         }
         private void TurnOffButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.TurnOff();
+            this.GoProClient.TurnOff();
         }
         private void ReconnectButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.Connect();
+            this.GoProClient.Connect();
         }
         private void StartButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.Start();
+            this.GoProClient.Start();
         }
-        private void StopButtonClick(object sender, RoutedEventArgs e)
+        private async void StopButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.Stop();
+            await this.GoProClient.Stop();
         }
     }
 }

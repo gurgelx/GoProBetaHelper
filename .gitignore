@@ -191,3 +191,5 @@ StyleCop.Cache
 bin
 obj
 todo.txt
+/.vscode
+/.vs/GoPro Webcam Beta helper/DesignTimeBuild

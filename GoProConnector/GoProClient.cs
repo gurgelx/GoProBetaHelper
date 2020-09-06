@@ -1,0 +1,215 @@
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.NetworkInformation;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace GoPro_Webcam_Beta_helper.GoProConnector
+{
+
+
+    public class GoProClient
+    {
+        private static readonly HttpClient client = new HttpClient();
+
+        public bool Connected { get; set; }
+        public bool Started { get; set; }
+        public int Lens { get; set; }
+        public int BatteryPercent { get; set; }
+        public string Name { get; set; }
+        public string Resolution { get; set; }
+        public IPAddress GoProIPAddress { get; set; }
+
+        public event EventHandler OnConnect;
+        public event EventHandler OnData;
+        public event EventHandler OnDisconnect;
+        public GoProClient()
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+            NetworkChange.NetworkAddressChanged += NetworkChanged;
+        }
+
+        public async void Connect()
+        {
+            var goproIpAddress = GetGoProIpAddress();
+            if (goproIpAddress != null)
+            {
+                GoProIPAddress = goproIpAddress;
+                Connected = true;
+                await GetStatus();
+                OnConnect?.Invoke(this, null);
+            }
+        }
+
+        public async Task Stop()
+        {
+            Started = false;
+            await Send("/gp/gpWebcam/STOP");
+        }
+        public async void Start()
+        {
+            Started = true;
+            await Send("/gp/gpWebcam/START?res=" + Resolution);
+        }
+
+        public async void TurnOff()
+        {
+            await Stop();
+            await Send("/gp/gpControl/command/system/sleep");
+            NotConnected();
+        }
+
+        public void SetWideMode()
+        {
+            Set("/gp/gpControl/setting/43/0");
+            Lens = 0;
+            OnData?.Invoke(this, null);
+        }
+
+        public void SetNarrowMode()
+        {
+            Set("/gp/gpControl/setting/43/6");
+            Lens = 6;
+            OnData?.Invoke(this, null);
+        }
+
+        public void SetLinearMode()
+        {
+            Set("/gp/gpControl/setting/43/4");
+            Lens = 4;
+            OnData?.Invoke(this, null);
+        }
+
+        public async void SetRes720()
+        {
+            await Stop();
+            Resolution = "720";
+            OnData?.Invoke(this, null);
+            Start();
+        }
+        public async void SetRes1080()
+        {
+            await Stop();
+            Resolution = "1080";
+            OnData?.Invoke(this, null);
+            Start();
+        }
+
+        public async Task<GoProStatus> GetStatus()
+        {
+            return await Get("/gp/gpControl/status");
+        }
+
+        public async void UpdateStatus()
+        {
+            await Get("/gp/gpControl/status");
+        }
+
+        private async void Set(string url)
+        {
+            await Stop();
+            await Send(url);
+            Start();
+        }
+
+        private async Task<GoProStatus> Get(string url)
+        {
+            var result = "{\"error\":true}";
+            var response = new HttpResponseMessage();
+            GoProStatus goprostatus = new GoProStatus();
+            try
+            {
+                if (GoProIPAddress != null)
+                {
+                    response = await client.GetAsync("http://" + GoProIPAddress + url);
+                    Connected = true;
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                NotConnected();
+            }
+            if (Connected)
+            {
+                result = response.Content.ReadAsStringAsync().Result;
+                goprostatus = JsonSerializer.Deserialize<GoProStatus>(result);
+            }
+
+            if (goprostatus.settings != null)
+            {
+                Lens = goprostatus.settings.lens;
+                if (goprostatus.settings.resolution == 7)
+                    Resolution = "720";
+                else if (goprostatus.settings.resolution == 12)
+                    Resolution = "1080";
+            }
+            if (goprostatus.status != null)
+            {
+                if (goprostatus.status.streaming == 1)
+                    Started = true;
+                else
+                    Started = false;
+
+                Name = goprostatus.status.name;
+                BatteryPercent = goprostatus.status.batteryPercent;
+            }
+            OnData?.Invoke(this, null);
+            return goprostatus;
+        }
+
+        private async Task Send(string url)
+        {
+            try
+            {
+                if (GoProIPAddress != null)
+                {
+                    await client.GetAsync("http://" + GoProIPAddress + url);
+                    Connected = true;
+                }
+            }
+            catch (OperationCanceledException e)
+            {
+                NotConnected();
+            }
+            OnData?.Invoke(this, null);
+        }
+
+        private void NotConnected()
+        {
+            Connected = false;
+            Resolution = "";
+            Name = "";
+            BatteryPercent = 0;
+            GoProIPAddress = null;
+            OnDisconnect?.Invoke(this, null);
+            OnData?.Invoke(this, null);
+        }
+
+        private IPAddress GetGoProIpAddress()
+        {
+            string value = string.Empty;
+            var goproNetworkInterface = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(n => n.Description == "GoPro RNDIS Device");
+            if (goproNetworkInterface == null)
+            {
+                NotConnected();
+            }
+            return goproNetworkInterface?.GetIPProperties().DhcpServerAddresses.FirstOrDefault()?.MapToIPv4();
+        }
+
+        private void NetworkChanged(object sender, EventArgs e)
+        {
+            var goproIpAddress = GetGoProIpAddress();
+            if (goproIpAddress != null && !Connected)
+            {
+                Connect();
+            }
+            else if (Connected)
+            {
+                NotConnected();
+            }
+        }
+    }
+}
