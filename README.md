@@ -5,8 +5,8 @@ Simple poc to make it easier to change modes on the GoPro when using it in WebCa
 Download and unzip all the files
 Then just run **GoPro Webcam Beta helper.exe**
 
- Rel 0.1, simple POC
- [Download](https://github.com/gurgelx/GoProBetaHelper/blob/master/releases/release.0.1.zip?raw=true)
+ Rel 0.2, simple POC with some additional features
+ [Download](https://github.com/gurgelx/GoProBetaHelper/blob/master/releases/release.0.2.zip?raw=true)
  
 
 ## Feel free to contribute
