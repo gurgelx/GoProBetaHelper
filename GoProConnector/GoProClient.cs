@@ -37,6 +37,7 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             var goproIpAddress = GetGoProIpAddress();
             if (goproIpAddress != null)
             {
+                init();
                 GoProIPAddress = goproIpAddress;
                 Connected = true;
                 await GetStatus();
@@ -100,12 +101,20 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
 
         public async Task<GoProStatus> GetStatus()
         {
-            return await Get("/gp/gpControl/status");
+            var status = await Get<GoProStatus>("/gp/gpControl/status");
+            this.HandleStatusResponse(status);
+            OnData?.Invoke(this, null);
+            return status;
         }
 
         public async void UpdateStatus()
         {
-            await Get("/gp/gpControl/status");
+            var status = await GetStatus();
+        }
+
+        private void init()
+        {
+            this.Resolution = "1080";
         }
 
         private async void Set(string url)
@@ -115,29 +124,27 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             Start();
         }
 
-        private async Task<GoProStatus> Get(string url)
+        private async Task<T> Get<T>(string url)
         {
-            var result = "{\"error\":true}";
-            var response = new HttpResponseMessage();
-            GoProStatus goprostatus = new GoProStatus();
             try
             {
                 if (GoProIPAddress != null)
                 {
-                    response = await client.GetAsync("http://" + GoProIPAddress + url);
+                    var response = await client.GetAsync("http://" + GoProIPAddress + url);
+                    var rawJson = response.Content.ReadAsStringAsync().Result;
                     Connected = true;
+                    return JsonSerializer.Deserialize<T>(rawJson);                    
                 }
             }
             catch (OperationCanceledException e)
             {
                 NotConnected();
             }
-            if (Connected)
-            {
-                result = response.Content.ReadAsStringAsync().Result;
-                goprostatus = JsonSerializer.Deserialize<GoProStatus>(result);
-            }
+            return default(T);
+        }
 
+        private void HandleStatusResponse(GoProStatus goprostatus)
+        {
             if (goprostatus.settings != null)
             {
                 Lens = goprostatus.settings.lens;
@@ -156,9 +163,7 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
                 Name = goprostatus.status.name;
                 BatteryPercent = goprostatus.status.batteryPercent;
             }
-            OnData?.Invoke(this, null);
-            return goprostatus;
-        }
+        }       
 
         private async Task Send(string url)
         {
