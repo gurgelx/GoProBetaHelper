@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GoPro_Webcam_Beta_helper"
         mc:Ignorable="d"
-        Title="GoPro Webcam Helper" Height="750" Width="280" Background="#FF4B4B4B" ResizeMode="NoResize">
+        Title="GoPro Webcam Helper" Height="750" Width="280" Background="#FF4B4B4B" ResizeMode="NoResize" Icon="/gopro.png">
     <Grid Margin="10,0,10,11">
         <Button Name="NarrowButton" Content="Narrow" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,15,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="NarrowButtonClick"/>
         <Button Name="WideButton" Content="Wide" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,94,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="WideButtonClick"/>

@@ -5,6 +5,15 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>GoPro_Webcam_Beta_helper</RootNamespace>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>gopro.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="gopro.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="gopro.png" />
+  </ItemGroup>
 
 </Project>
