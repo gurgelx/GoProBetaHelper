@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GoPro_Webcam_Beta_helper
 {
@@ -33,105 +22,116 @@ namespace GoPro_Webcam_Beta_helper
 
         private void Connector_OnConnect(object sender, EventArgs e)
         {
-            this.IpLabel.Content = this.Connector.GoProIPAddress;
-            this.NameLabel.Content = this.Connector.Name;
-            this.OffButton.IsEnabled = true;
-            this.WideButton.IsEnabled = true;
-            this.WideButton.IsEnabled = true;
-            this.LinearButton.IsEnabled = true;
-            this.NarrowButton.IsEnabled = true;
-            this.Res720Button.IsEnabled = true;
-            this.Res1080Button.IsEnabled = true;
-            this.StopButton.IsEnabled = true;
-            this.StartButton.IsEnabled = true;
-            this.GetStatus.IsEnabled = true;
+            this.Dispatcher.Invoke(() =>
+            {
+                this.IpLabel.Content = this.Connector.GoProIPAddress;
+                this.NameLabel.Content = this.Connector.Name;
+                this.OffButton.IsEnabled = true;
+                this.WideButton.IsEnabled = true;
+                this.WideButton.IsEnabled = true;
+                this.LinearButton.IsEnabled = true;
+                this.NarrowButton.IsEnabled = true;
+                this.Res720Button.IsEnabled = true;
+                this.Res1080Button.IsEnabled = true;
+                this.StopButton.IsEnabled = true;
+                this.StartButton.IsEnabled = true;
+                this.GetStatus.IsEnabled = true;
+            });
         }
         private void Connector_OnDisconnect(object sender, EventArgs e)
         {
-            this.IpLabel.Content = this.Connector.GoProIPAddress;
-            this.NameLabel.Content = this.Connector.Name;
-            this.OffButton.IsEnabled = false;
-            this.WideButton.IsEnabled = false;
-            this.WideButton.IsEnabled = false;
-            this.LinearButton.IsEnabled = false;
-            this.NarrowButton.IsEnabled = false;
-            this.Res720Button.IsEnabled = false;
-            this.Res1080Button.IsEnabled = false;
-            this.StopButton.IsEnabled = false;
-            this.StartButton.IsEnabled = false;
-            this.GetStatus.IsEnabled = false;
+            this.Dispatcher.Invoke(() =>
+            {
+                this.IpLabel.Content = this.Connector.GoProIPAddress;
+                this.NameLabel.Content = this.Connector.Name;
+                this.OffButton.IsEnabled = false;
+                this.WideButton.IsEnabled = false;
+                this.WideButton.IsEnabled = false;
+                this.LinearButton.IsEnabled = false;
+                this.NarrowButton.IsEnabled = false;
+                this.Res720Button.IsEnabled = false;
+                this.Res1080Button.IsEnabled = false;
+                this.StopButton.IsEnabled = false;
+                this.StartButton.IsEnabled = false;
+                this.GetStatus.IsEnabled = false;
+            });
         }
 
         private void Connector_OnData(Object sender, EventArgs e)
         {
-
-            if(this.Connector.Connected == false)
-            {
-                this.NameLabel.Content = "Camera is: Disconnected";
-            } else 
+            this.Dispatcher.Invoke(() =>
             {
 
-                this.IpLabel.Content = this.Connector.GoProIPAddress;
-                this.NameLabel.Content = "Camera is: " + this.Connector.Name;
-                this.ResolutionLabel.Content = "Resolution is: " + this.Connector.Resolution;
-                this.BatteryLabel.Content = "Battery Percent is: " + this.Connector.BatteryPercent;
-                
-                var lensIs = "Current lens is: ";
-                switch (this.Connector.Lens)
+                if (this.Connector.Connected == false)
                 {
-                    case 0:
-                        lensIs += "Wide";
-                        this.WideButton.Background = new SolidColorBrush(Color.FromRgb(121,134,203));
-                        this.LinearButton.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        this.NarrowButton.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        break;
-                    case 4:
-                        lensIs += "Linear";
-                        this.LinearButton.Background = new SolidColorBrush(Color.FromRgb(121,134,203));
-                        this.WideButton.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        this.NarrowButton.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        break;
-                    case 6:
-                        lensIs += "Narrow";
-                        this.NarrowButton.Background = new SolidColorBrush(Color.FromRgb(121,134,203));
-                        this.WideButton.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        this.LinearButton.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        break;
-                    default:
-                    lensIs += "N/A";
-                        break;
+                    this.NameLabel.Content = "Camera is: Disconnected";
                 }
-                
-                switch (this.Connector.Resolution)
+                else
                 {
-                    case "720":
-                        this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(121,134,203));
-                        this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        break;
-                    case "1080":
-                        this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(121,134,203));
-                        this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        break;
-                    default:
-                        this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(43,43,43));
-                        break;
-                }
-                if(this.Connector.Started)
-                {
-                    this.StartButton.Background =  new SolidColorBrush(Color.FromRgb(121,134,203));
-                    this.StopButton.Background =  new SolidColorBrush(Color.FromRgb(43,43,43));
 
-                } else {
-                    this.StartButton.Background =  new SolidColorBrush(Color.FromRgb(43,43,43));
-                    this.StopButton.Background =  new SolidColorBrush(Color.FromRgb(121,134,203));
+                    this.IpLabel.Content = this.Connector.GoProIPAddress;
+                    this.NameLabel.Content = "Camera is: " + this.Connector.Name;
+                    this.ResolutionLabel.Content = "Resolution is: " + this.Connector.Resolution;
+                    this.BatteryLabel.Content = "Battery Percent is: " + this.Connector.BatteryPercent;
+
+                    var lensIs = "Current lens is: ";
+                    switch (this.Connector.Lens)
+                    {
+                        case 0:
+                            lensIs += "Wide";
+                            this.WideButton.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                            this.LinearButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            this.NarrowButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            break;
+                        case 4:
+                            lensIs += "Linear";
+                            this.LinearButton.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                            this.WideButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            this.NarrowButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            break;
+                        case 6:
+                            lensIs += "Narrow";
+                            this.NarrowButton.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                            this.WideButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            this.LinearButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            break;
+                        default:
+                            lensIs += "N/A";
+                            break;
+                    }
+
+                    switch (this.Connector.Resolution)
+                    {
+                        case "720":
+                            this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                            this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            break;
+                        case "1080":
+                            this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                            this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            break;
+                        default:
+                            this.Res720Button.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            this.Res1080Button.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                            break;
+                    }
+                    if (this.Connector.Started)
+                    {
+                        this.StartButton.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                        this.StopButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+
+                    }
+                    else
+                    {
+                        this.StartButton.Background = new SolidColorBrush(Color.FromRgb(43, 43, 43));
+                        this.StopButton.Background = new SolidColorBrush(Color.FromRgb(121, 134, 203));
+                    }
                 }
-            }
-            //this.CurrentLens.Content = lensIs;
+            });
         }
-        private void GetCurrentLens(object sender, RoutedEventArgs e)
+        private void UpdateStatus(object sender, RoutedEventArgs e)
         {
-            this.Connector.GetCurrentLens();
+            this.Connector.UpdateStatus();
         }
 
         private void WideButtonClick(object sender, RoutedEventArgs e)
@@ -158,7 +158,7 @@ namespace GoPro_Webcam_Beta_helper
         }
         private void TurnOffButtonClick(object sender, RoutedEventArgs e)
         {
-            this.Connector.PreTurnOff();
+            this.Connector.TurnOff();
         }
         private void ReconnectButtonClick(object sender, RoutedEventArgs e)
         {

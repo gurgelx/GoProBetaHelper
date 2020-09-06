@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace GoPro_Webcam_Beta_helper
 {
@@ -38,8 +36,7 @@ namespace GoPro_Webcam_Beta_helper
         private static readonly HttpClient client = new HttpClient();
 
         public bool Connected { get; set; }
-        public bool Started { get; set; }
-        public bool TurnOffFlag { get; set; }
+        public bool Started { get; set; }        
         public int Lens { get; set; }
         public int BatteryPercent { get; set; }
         public string Name { get; set; }
@@ -52,44 +49,37 @@ namespace GoPro_Webcam_Beta_helper
         public GoProConnector()
         {
             client.Timeout = TimeSpan.FromSeconds(10);
-        }
-        public void Connect()
-        {
-            var networkInterface =  this.GetGoProNetworkInterface();
-            if(networkInterface != null)
-            {
-                this.GoProIPAddress = networkInterface.GetIPProperties().DhcpServerAddresses.FirstOrDefault().MapToIPv4();
-                this.Connected = true;
-                this.Resolution = "1080";
-                this.Lens = 6;
-                this.GetStatus();
-                OnConnect?.Invoke(this, null);
-                this.SetNarrowMode();
-            }
+            NetworkChange.NetworkAddressChanged += NetworkChanged;
         }
 
-        public void Stop()
+        public async void Connect()
+        {
+            var goproIpAddress =  this.GetGoProIpAddress();
+            if(goproIpAddress != null)
+            {
+                this.GoProIPAddress = goproIpAddress; 
+                this.Connected = true;                
+                await this.GetStatus();
+                OnConnect?.Invoke(this, null);
+            }
+        }
+        
+        public async Task Stop()
         {
             this.Started = false;  
-            this.Send("/gp/gpWebcam/STOP");
+            await this.Send("/gp/gpWebcam/STOP");
         }
-        public void Start()
+        public async void Start()
         {
             this.Started = true; 
-            this.Send("/gp/gpWebcam/START?res=" + this.Resolution);
+            await this.Send("/gp/gpWebcam/START?res=" + this.Resolution);
         }
-        public void PreTurnOff()
+        
+        public async void TurnOff()
         {
-            this.Stop();
-            this.TurnOffFlag = true;
-            System.Threading.Thread.Sleep(2000);
-            this.GetStatus();
+            await this.Stop();
+            await this.Send("/gp/gpControl/command/system/sleep");
             this.NotConnected();
-        }
-        public void TurnOff()
-        {
-            this.Send("/gp/gpControl/command/system/sleep");
-            this.TurnOffFlag = false;
         }
 
         public void SetWideMode()
@@ -97,7 +87,6 @@ namespace GoPro_Webcam_Beta_helper
             this.Set("/gp/gpControl/setting/43/0");
             this.Lens = 0;
             OnData?.Invoke(this, null);
-            this.GetCurrentLens();
         }
 
         public void SetNarrowMode()
@@ -105,7 +94,6 @@ namespace GoPro_Webcam_Beta_helper
             this.Set("/gp/gpControl/setting/43/6");
             this.Lens = 6;
             OnData?.Invoke(this, null);
-            this.GetCurrentLens();
         }
 
         public void SetLinearMode()
@@ -113,42 +101,41 @@ namespace GoPro_Webcam_Beta_helper
             this.Set("/gp/gpControl/setting/43/4");
             this.Lens = 4;
             OnData?.Invoke(this, null);
-            this.GetCurrentLens();
         }     
 
-        public void SetRes720()
+        public async void SetRes720()
         {
-            this.Stop();
+            await this.Stop();
             this.Resolution = "720";
             OnData?.Invoke(this, null);
             this.Start();
         }     
-        public void SetRes1080()
+        public async void SetRes1080()
         {
-            this.Stop();
+            await this.Stop();
             this.Resolution = "1080";
             OnData?.Invoke(this, null);
             this.Start();
         }     
-        public void GetCurrentLens()
-        {
-            
-            this.GetStatus();
-        }   
 
-        public void GetStatus()
+        public async Task<GoProStatus> GetStatus()
         {
-            this.Get("/gp/gpControl/status");
-        }   
+            return await this.Get("/gp/gpControl/status");
+        }
 
-        private void Set(string url)
+        public async void UpdateStatus()
         {
-            this.Stop();
-            this.Send(url);
+            await this.Get("/gp/gpControl/status");
+        }
+
+        private async void Set(string url)
+        {
+            await this.Stop();
+            await this.Send(url);
             this.Start();
         }
 
-        private async void Get(string url)
+        private async Task<GoProStatus> Get(string url)
         {
             var result = "{\"error\":true}";
             var response = new HttpResponseMessage();
@@ -181,20 +168,18 @@ namespace GoPro_Webcam_Beta_helper
             if(goprostatus.status != null)
             {
                 if(goprostatus.status.streaming == 1)
-                    this.Started = true;
-                else if(this.TurnOffFlag) {
-                    this.Started = false;
-                    this.TurnOff();
-                } else 
+                    this.Started = true;                
+                else 
                     this.Started = false;
 
                 this.Name = goprostatus.status.name;
                 this.BatteryPercent = goprostatus.status.batteryPercent;
             }
             OnData?.Invoke(this, null);
+            return goprostatus;
         }
 
-        private async void Send(string url)
+        private async Task Send(string url)
         {
             try
             {
@@ -212,15 +197,16 @@ namespace GoPro_Webcam_Beta_helper
         
         private void NotConnected()
         {
-            this.Connected = false;
-            OnDisconnect?.Invoke(this, null);
+            this.Connected = false;            
             this.Resolution = "";
             this.Name = "";
             this.BatteryPercent = 0;
+            this.GoProIPAddress = null;
+            OnDisconnect?.Invoke(this, null);
             OnData?.Invoke(this, null);
         }
 
-        private NetworkInterface GetGoProNetworkInterface()
+        private IPAddress GetGoProIpAddress()
         {
             string value = string.Empty;
             var goproNetworkInterface = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(n => n.Description == "GoPro RNDIS Device");
@@ -228,7 +214,18 @@ namespace GoPro_Webcam_Beta_helper
             {
                 this.NotConnected();
             }
-            return goproNetworkInterface;
+            return goproNetworkInterface?.GetIPProperties().DhcpServerAddresses.FirstOrDefault()?.MapToIPv4();
+        }
+
+        private void NetworkChanged(object sender, EventArgs e)
+        {
+            var goproIpAddress = this.GetGoProIpAddress();
+            if (goproIpAddress != null && !this.Connected) {
+                this.Connect();
+            }else if (this.Connected)
+            {
+                this.NotConnected();
+            }
         }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GoPro_Webcam_Beta_helper"
         mc:Ignorable="d"
-        Title="GoPro Webcam Helper" Height="850" Width="280" Background="#FF4B4B4B" ResizeMode="NoResize">
+        Title="GoPro Webcam Helper" Height="750" Width="280" Background="#FF4B4B4B" ResizeMode="NoResize">
     <Grid Margin="10,0,10,11">
         <Button Name="NarrowButton" Content="Narrow" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,15,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="NarrowButtonClick"/>
         <Button Name="WideButton" Content="Wide" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,94,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="WideButtonClick"/>
@@ -15,15 +15,17 @@
         <Button Name="StartButton" Content="Start" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="85" Margin="0,331,85,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="StartButtonClick"/>
         <Button Name="StopButton" Content="Stop" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="85" Margin="85,331,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="StopButtonClick"/>
         <Button Name="OffButton" Content="Power Off" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,410,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="TurnOffButtonClick"/>
-        <Button Name="GetStatus" Content="Get Status" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,490,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="GetCurrentLens"/>
-        <Button Content="Reconnect" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,569,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="ReconnectButtonClick"/>
+        <Button Name="GetStatus" Content="Get Status" HorizontalAlignment="Center" VerticalAlignment="Top" Height="79" Width="170" Margin="0,490,0,0" Background="#FF2B2B2B" Foreground="White" FontSize="24" FontFamily="Calibri" Click="UpdateStatus"/>
 
-        <Label Content="Connected to ip:" HorizontalAlignment="Center" Margin="0,660,0,0" VerticalAlignment="Top" Width="170"/>
-        <Label Name="IpLabel" Content="Not Connected" HorizontalAlignment="Center" Margin="0,680,0,0" VerticalAlignment="Top" Width="170" />
-        <Label Name="NameLabel" Content="Camera is: " HorizontalAlignment="Center" Margin="0,700,0,0" VerticalAlignment="Top" Width="170" />
-        <Label Name="ResolutionLabel" Content="Resolution is: " HorizontalAlignment="Center" Margin="0,720,0,0" VerticalAlignment="Top" Width="170" />
-        <Label Name="BatteryLabel" Content="Battery Percent is: " HorizontalAlignment="Center" Margin="0,740,0,0" VerticalAlignment="Top" Width="170" />
-      
+        
+        <StackPanel Margin="0,574,0,0">
+            <Label Content="Connected to ip:" HorizontalAlignment="Center" VerticalAlignment="Top" Width="170"/>
+            <Label Name="IpLabel" Content="Not Connected" HorizontalAlignment="Center" VerticalAlignment="Top" Width="170" />
+            <Label Name="NameLabel" Content="Camera is: " HorizontalAlignment="Center" VerticalAlignment="Top" Width="170" />
+            <Label Name="ResolutionLabel" Content="Resolution is: " HorizontalAlignment="Center"  VerticalAlignment="Top" Width="170" />
+            <Label Name="BatteryLabel" Content="Battery Percent is: " HorizontalAlignment="Center"  VerticalAlignment="Top" Width="170" />
+        </StackPanel>
+
 
     </Grid>
 </Window>
