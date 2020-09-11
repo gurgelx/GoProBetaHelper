@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace GoPro_Webcam_Beta_helper.GoProConnector
@@ -14,6 +13,8 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
     public class GoProClient
     {
         private static readonly HttpClient client = new HttpClient();
+
+        public RawValues RawValues { get; set; }
 
         public bool Connected { get; set; }
         public bool Started { get; set; }
@@ -40,8 +41,13 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
                 init();
                 GoProIPAddress = goproIpAddress;
                 Connected = true;
-                await GetStatus();
-                OnConnect?.Invoke(this, null);
+                try
+                {
+                    await GetStatus();
+                    await GetRawValues();
+                }
+                catch (Exception e) {}
+                OnConnect?.Invoke(this, null);                
             }
         }
 
@@ -63,23 +69,23 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             NotConnected();
         }
 
-        public void SetWideMode()
+        public async void SetWideMode()
         {
-            Set("/gp/gpControl/setting/43/0");
+            await Set("/gp/gpControl/setting/43/0");
             Lens = 0;
             OnData?.Invoke(this, null);
         }
 
-        public void SetNarrowMode()
+        public async void SetNarrowMode()
         {
-            Set("/gp/gpControl/setting/43/6");
+            await Set("/gp/gpControl/setting/43/6");
             Lens = 6;
             OnData?.Invoke(this, null);
         }
 
-        public void SetLinearMode()
+        public async void SetLinearMode()
         {
-            Set("/gp/gpControl/setting/43/4");
+            await Set("/gp/gpControl/setting/43/4");
             Lens = 4;
             OnData?.Invoke(this, null);
         }
@@ -97,7 +103,7 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             Resolution = "1080";
             OnData?.Invoke(this, null);
             Start();
-        }
+        }       
 
         public async Task<GoProStatus> GetStatus()
         {
@@ -112,12 +118,25 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             var status = await GetStatus();
         }
 
+        public async void SetValue(string setting, string value)
+        {
+            var url = String.Format("/gp/gpControl/setting/{0}/{1}", setting, value);
+            await this.Set(url);
+            await this.GetStatus();
+            await this.GetRawValues();
+        }
+
+        private async Task GetRawValues()
+        {
+            this.RawValues = await Get<RawValues>("/gp/gpControl/status");
+        }
+
         private void init()
         {
             this.Resolution = "1080";
         }
 
-        private async void Set(string url)
+        private async Task Set(string url)
         {
             await Stop();
             await Send(url);

@@ -11,3 +11,6 @@ Then just run **GoPro Webcam Beta helper.exe**
 
 ## Feel free to contribute
 The project is made with C# in .Net Core 3.1
+
+## Contributors:
+[pellepelle3](https://github.com/pellepelle3)

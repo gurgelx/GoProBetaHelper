@@ -1,5 +1,7 @@
 ﻿using GoPro_Webcam_Beta_helper.GoProConnector;
 using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Windows;
 using System.Windows.Media;
 
@@ -13,12 +15,17 @@ namespace GoPro_Webcam_Beta_helper
         public GoProClient GoProClient { get; set; }
         public MainWindow()
         {
+
             InitializeComponent();
+            this.DeveloperPanel.Visibility = Visibility.Collapsed;
             this.GoProClient = new GoProClient();
             this.GoProClient.OnConnect += Connector_OnConnect;
             this.GoProClient.OnDisconnect += Connector_OnDisconnect;
             this.GoProClient.OnData += Connector_OnData;
-            this.GoProClient.Connect();            
+            this.GoProClient.Connect();
+#if DEBUG
+            this.DeveloperPanel.Visibility = Visibility.Visible;
+#endif
         }
 
         private void Connector_OnConnect(object sender, EventArgs e)
@@ -36,7 +43,8 @@ namespace GoPro_Webcam_Beta_helper
                 this.Res1080Button.IsEnabled = true;
                 this.StopButton.IsEnabled = true;
                 this.StartButton.IsEnabled = true;
-                this.GetStatus.IsEnabled = true;
+                this.GetStatus.IsEnabled = true;                
+                this.SettingsList.ItemsSource = this.GoProClient.RawValues.settings;                
             });
         }
         private void Connector_OnDisconnect(object sender, EventArgs e)
@@ -172,6 +180,23 @@ namespace GoPro_Webcam_Beta_helper
         private async void StopButtonClick(object sender, RoutedEventArgs e)
         {
             await this.GoProClient.Stop();
+        }
+
+        private void OnSetManualValue(object sender, RoutedEventArgs e)
+        {
+            var currentSetting = (KeyValuePair<string,object>)SettingsList.SelectedItem;
+            var currentValue = SettingValue.Text;
+            this.GoProClient.SetValue(currentSetting.Key, currentValue);
+        }
+
+        private void SettingsList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if(SettingsList.SelectedItem == null)
+            {
+                return;
+            }
+            var currentSetting = (KeyValuePair<string, object>)SettingsList.SelectedItem;
+            this.SettingValue.Text = currentSetting.Value.ToString();
         }
     }
 }

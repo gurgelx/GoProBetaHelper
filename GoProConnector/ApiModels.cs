@@ -25,7 +25,13 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
 
     public class GoProStatus
     {
-        public Status status { get; set; }
-        public Settings settings { get; set; }
+        public Status status { get; set; }        
+        public Settings settings { get; set; }        
+    }
+
+    public class RawValues
+    {
+        public Dictionary<string, object> settings { get; set; }
+        public Dictionary<string, object> status { get; set; }
     }
 }
