@@ -167,10 +167,18 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             if (goprostatus.settings != null)
             {
                 Lens = goprostatus.settings.lens;
-                if (goprostatus.settings.resolution == 7)
-                    Resolution = "720";
-                else if (goprostatus.settings.resolution == 12)
-                    Resolution = "1080";
+                switch(goprostatus.settings.resolution)
+                {
+                    case 4:
+                        Resolution = "480";
+                        break;
+                    case 7:
+                        Resolution = "720";
+                        break;
+                    case 12:
+                        Resolution = "1080";
+                        break;
+                }   
             }
             if (goprostatus.status != null)
             {

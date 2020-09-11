@@ -19,7 +19,7 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
     {
         [JsonPropertyName("43")]
         public int lens { get; set; }
-        [JsonPropertyName("47")]
+        [JsonPropertyName("64")]
         public int resolution { get; set; }
     }
 
