@@ -71,21 +71,21 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
 
         public async void SetWideMode()
         {
-            await Set("/gp/gpControl/setting/43/0");
+            await this.DirectSet("/gp/gpWebcam/SETTINGS?fov=0");
             Lens = 0;
             OnData?.Invoke(this, null);
         }
 
         public async void SetNarrowMode()
         {
-            await Set("/gp/gpControl/setting/43/6");
+            await this.DirectSet("/gp/gpWebcam/SETTINGS?fov=6");            
             Lens = 6;
             OnData?.Invoke(this, null);
         }
 
         public async void SetLinearMode()
         {
-            await Set("/gp/gpControl/setting/43/4");
+            await this.DirectSet("/gp/gpWebcam/SETTINGS?fov=4");
             Lens = 4;
             OnData?.Invoke(this, null);
         }
@@ -141,6 +141,11 @@ namespace GoPro_Webcam_Beta_helper.GoProConnector
             await Stop();
             await Send(url);
             Start();
+        }
+
+        private async Task DirectSet(string url)
+        {   
+            await Send(url);            
         }
 
         private async Task<T> Get<T>(string url)
